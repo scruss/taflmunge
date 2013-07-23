@@ -26,6 +26,9 @@ with:
 * RX-only and Multiple Links flags have been retained as new fields
   FLAGRXONLY (= 1 if receive-only) and FLAGMULTI ('*' if part of a
   multi-station link path).
+* TX field is nulled if FLAGRXONLY is set.
+* DATE is reformatted as an ISO-standard YYYY-MM-DD format.
+* RECID has had leading zeroes stripped.
 * "Class of Emission (2)" has been retained as CL2EMMIS (it was
   stripped out by the offical DOS-only DBF converter).
 * Text fields have had blanks stripped, spacing normalized, and quote
@@ -36,6 +39,8 @@ Author
 ------
 
 Stewart C. Russell - http://scruss.com/blog/
+
+Data parsing method strongly influenced by [dave0/Parse-SpectrumDirect-RadioFrequency](https://github.com/dave0/Parse-SpectrumDirect-RadioFrequency "dave0/Parse-SpectrumDirect-RadioFrequency").
 
 Licence
 -------
