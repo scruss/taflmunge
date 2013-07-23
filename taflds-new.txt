@@ -1,0 +1,88 @@
+
+                   TAFL DATA FILE LAYOUT
+                   --------------------- 
+
+FIELD             INITIAL       FINAL    FIELD  CHARACTER
+NAME              LOCATION   LOCATION   LENGTH       TYPE
+_________________________________________________________
+TX                        1        12       12          9
+
+FLAGRXONLY               13        13        1          X
+
+RX                       15        26       12          9
+
+F                        29        29        1          9
+
+RECID                    31        41       11          9
+
+LOCATION                 43        77       35          X
+
+IC                       79        80        2          X
+
+LAT                      82        87        6          9
+
+LONG                     89        95        7          9
+
+ERP                      97       101        5          9
+
+GANT                    103       107        5          9
+
+AZIM                    109       114        6          9
+
+SITE                    116       120        5          9
+
+HANT                    122       125        4          9
+
+PARC                    127       130        4          9
+
+C                       132       132        1          9
+
+Z                       134       134        1          9
+
+LINKID                  136       141        6          X
+
+FLAGMULTI               142       142        1          X
+
+E                       144       144        1          9
+
+P                       146       146        1          X
+
+DO                      148       149        2          9
+
+LICENCE                 150       156        7          9
+
+L                       159       159        1          X
+
+COCODE                  162       170        9          9
+
+LICENSEE                172       189       18          X
+
+CLASSNA                 191       196        6          X
+
+SKIPBLANKS              198       202        5          9
+
+CALLSIGN                204       209        6          X
+
+NOMOB                   211       215        4          9
+
+BW1EMMIS                216       224        9          X
+
+BW2EMMIS                226       229        4          X
+
+CL2EMMIS                230       234        5          X
+
+DATE                    236       243        8          9
+
+TLPT                    246       250        5          9
+
+TXP                     252       256        5          9
+
+PWRUNIT                 257       259        3          X
+
+PANT                    261       264        4          9
+
+ELEV                    266       269        4          9
+
+ICN                     271       277        7          9
+
+SKIPFILL                279       279        1          X
