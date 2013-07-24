@@ -58,7 +58,7 @@ sub get_tafl {
                     $record{$key} = ddmmss2dd( $record{$key} );
                 }
             }
-            if ( $key eq 'LON' ) {
+            if ( $key eq 'LONG' ) {
                 if (   ( exists( $record{$key} ) )
                     && ( length( $record{$key} ) > 5 ) )
                 {
