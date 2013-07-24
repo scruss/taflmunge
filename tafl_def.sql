@@ -38,4 +38,4 @@ CREATE TABLE tafl (
   PANT         INTEGER,
   ELEV         DOUBLE,
   ICN          INTEGER
-)
+);
