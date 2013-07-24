@@ -31,6 +31,7 @@ with:
 * RECID has had leading zeroes stripped.
 * "Class of Emission (2)" has been retained as CL2EMMIS (it was
   stripped out by the offical DOS-only DBF converter).
+* Transmission power units (for those rated in watts) is stored in PWRUNIT.
 * Text fields have had blanks stripped, spacing normalized, and quote
   characters removed, as clearly some imports to the database had come
   straight from Excel.
