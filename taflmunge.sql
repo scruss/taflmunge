@@ -1,13 +1,25 @@
--- test import TAFL data
+-- import TAFL data into SpatiaLite
+-- tested with SpatiaLite version 3.1.0-RC2
+--        based on SQLite version 3.7.15.2
+
+-- scruss - 2013-07-30
+-- Licence: WTFPL
+
+-- some housekeeping
 drop table if exists lines;
 drop table if exists tafl;
+
 -- create a scratch table just for the input lines
 create temporary table lines (line TEXT);
-.import atl_tafl.txt lines
+
+-- !!! if you want to use a different file name, change the .import line !!!
+.import tafl.txt lines
 .remdupl lines
+
 -- clean up spurious quotes in fields
 UPDATE lines SET line=replace(line, '"', ' ');
--- now define main TAFL table
+
+-- now define main TAFL table; a superset of the old DBF TAFL table
 CREATE TABLE tafl (
   PK_ROWID     INTEGER PRIMARY KEY,
   TX           DOUBLE,
@@ -51,6 +63,8 @@ CREATE TABLE tafl (
   ICN          INTEGER
 );
 
+-- slice and dice input lines into meaningful TAFL entries
+-- done this way so we can have a useful PK for every record.
 INSERT INTO tafl(TX, FLAGRXONLY, RX, F, RECID, LOCATION, IC, LAT, LONG,
        ERP, GANT, AZIM, SITE, HANT, PARC, C, Z, LINKID,
        FLAGMULTI, E, P, DO, LICENCE, L, COCODE, LICENSEE,
@@ -135,10 +149,9 @@ INSERT INTO tafl(TX, FLAGRXONLY, RX, F, RECID, LOCATION, IC, LAT, LONG,
 -- Field: ICN          Start: 271 Length:   7 Type: INTEGER  (Numeric)
   substr(LINE, 271, 7)
 from lines;
--- end TAFL table def
 
+-- done with input lines now
 drop table lines;
-vacuum;
 
 -- clean out empty strings and set to null
 begin;
@@ -162,15 +175,24 @@ UPDATE tafl SET PWRUNIT = NULL WHERE TRIM(PWRUNIT)='';
 UPDATE tafl SET DATE = NULL WHERE DATE='    -  -  ';
 UPDATE tafl SET ICN = NULL WHERE TRIM(ICN)='';
 UPDATE tafl set ERP = NULL where trim(ERP)='';
+
+-- we have no use for entries with no location
 delete from tafl where trim(lat)='';
 delete from tafl where trim(long)='';
 commit;
--- these are not quite perfect yet FIXME CLEANUPS
--- but add geometry anyway
+
+-- add geometry
 SELECT AddGeometryColumn('tafl','geom',4326,'POINT','XY');
+
+-- wanted to keep TAFL's quaint [D]DDMMSS string coordinate format
+--  (someone might be using it ...)
+-- but this made calculating decimal degrees quite ugly
+-- note that these decomal coords are nowhere in the regular fields
 UPDATE tafl SET geom = GeomFromText('POINT('||(0-(cast(substr(long,1,3) as real)+cast(substr(long,4,2) as real)/60+cast(substr(long,6,2) as real)/3600))||' '||(cast(substr(lat,1,2) as real)+cast(substr(lat,3,2) as real)/60+cast(substr(lat,5,2) as real)/3600)||')' ,4326);
 
--- now create links temporary table
+-- create links temporary table
+--  (temporary to get around SQLite's ALTER TABLE limitations)
+-- I still have a sneaking feeling the logic's wrong somewhere here.
 CREATE TEMPORARY TABLE templinks AS
 SELECT s.callsign||'-'||s.linkid AS NAME,
        s.PK_ROWID AS CALL_ROWID,
@@ -198,6 +220,7 @@ WHERE s.callsign IS NOT NULL
   AND e.L<>'R'
 GROUP BY name, s.TX;
 
+-- create the permanent links table, complete with PK and geometry
 CREATE TABLE links(
   PK_ROWID INTEGER PRIMARY KEY,
   NAME TEXT,
@@ -209,9 +232,9 @@ CREATE TABLE links(
   RX REAL,
   TX REAL
 );
-
 SELECT AddGeometryColumn('links','geom',4326,'LINESTRING','XY');
 
+-- populate links table
 INSERT INTO links (NAME, CALL_ROWID, LINK_ROWID, LICENSEE, 
        STARTLOC, ENDLOC, RX, TX, geom)
   SELECT NAME, CALL_ROWID, LINK_ROWID, LICENSEE, 
@@ -219,7 +242,12 @@ INSERT INTO links (NAME, CALL_ROWID, LINK_ROWID, LICENSEE,
        GeomFromText('LINESTRING('||startlong||' '||startlat||','||endlong||' '||endlat||')',4326)
   FROM templinks;
 
+-- finished with temp links table
 drop table templinks;
+
+-- create some indices - more useful for local searches 
 select CreateSpatialIndex('tafl', 'geom');
 select CreateSpatialIndex('links', 'geom');
+
+-- clean up and exit
 vacuum;
