@@ -41,7 +41,7 @@ of SpatiaLite, and can be run as:
 	
 After a short while and some very confusing output, this creates a
 database file with two tables: "tafl" (point geometry) and "links" (for
-clearly indentifiable microwave links; linestring geometry). Other
+clearly identifiable microwave links; linestring geometry). Other
 fields are as
 [description](http://spectrum.ic.gc.ca/tafl/tafl/tafl.txt), except
 with:
