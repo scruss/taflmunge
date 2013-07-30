@@ -10,7 +10,7 @@ drop table if exists lines;
 drop table if exists tafl;
 
 -- create a scratch table just for the input lines
-create temporary table lines (line TEXT);
+create table lines (line TEXT);
 
 -- !!! if you want to use a different file name, change the .import line !!!
 .import tafl.txt lines
@@ -26,7 +26,7 @@ CREATE TABLE tafl (
   FLAGRXONLY   TEXT,
   RX           DOUBLE,
   F            INTEGER,
-  RECID        INTEGER,
+  RECID        TEXT,
   LOCATION     TEXT,
   IC           TEXT,
   LAT          TEXT,
@@ -60,7 +60,8 @@ CREATE TABLE tafl (
   PWRUNIT      TEXT,
   PANT         INTEGER,
   ELEV         DOUBLE,
-  ICN          INTEGER
+  ICN          INTEGER,
+  RADIUSKM     INTEGER
 );
 
 -- slice and dice input lines into meaningful TAFL entries
@@ -69,13 +70,13 @@ INSERT INTO tafl(TX, FLAGRXONLY, RX, F, RECID, LOCATION, IC, LAT, LONG,
        ERP, GANT, AZIM, SITE, HANT, PARC, C, Z, LINKID,
        FLAGMULTI, E, P, DO, LICENCE, L, COCODE, LICENSEE,
        CLASSNA, CALLSIGN, NOMOB, BW1EMMIS, BW2EMMIS, CL2EMMIS,
-       DATE, TLPT, TXP, PWRUNIT, PANT, ELEV, ICN) SELECT
+       DATE, TLPT, TXP, PWRUNIT, PANT, ELEV, ICN, RADIUSKM) SELECT
 -- Field: TX           Start:   1 Length:  12 Type: DOUBLE   (Numeric)
-  cast(substr(LINE, 1, 12) as real)/1000.0,
+  cast(substr(LINE, 1, 12) as real)/1e6,
 -- Field: FLAGRXONLY   Start:  13 Length:   1 Type: TEXT     (Text)
   substr(LINE, 13, 1),
 -- Field: RX           Start:  15 Length:  12 Type: DOUBLE   (Numeric)
-  cast(substr(LINE, 15, 12) as real)/1000.0,
+  cast(substr(LINE, 15, 12) as real)/1e6,
 -- Field: F            Start:  29 Length:   1 Type: INTEGER  (Numeric)
   substr(LINE, 29, 1),
 -- Field: RECID        Start:  31 Length:  11 Type: INTEGER  (Numeric)
@@ -147,7 +148,10 @@ INSERT INTO tafl(TX, FLAGRXONLY, RX, F, RECID, LOCATION, IC, LAT, LONG,
 -- Field: ELEV         Start: 266 Length:   4 Type: DOUBLE   (Numeric)
   substr(LINE, 266, 4),
 -- Field: ICN          Start: 271 Length:   7 Type: INTEGER  (Numeric)
-  substr(LINE, 271, 7)
+  substr(LINE, 271, 7),
+-- Field: RADIUSKM     Start: 123 Length:   4 Type: INTEGER  (Numeric)
+-- annoying optional; if classna like 'M%'
+  substr(LINE, 123, 4)
 from lines;
 
 -- done with input lines now
@@ -158,6 +162,7 @@ begin;
 UPDATE tafl SET FLAGRXONLY = NULL WHERE TRIM(FLAGRXONLY)='';
 UPDATE tafl SET LOCATION = NULL WHERE TRIM(LOCATION)='';
 UPDATE tafl SET LOCATION = TRIM(LOCATION);
+UPDATE tafl SET RECID = NULL WHERE TRIM(RECID)='';
 UPDATE tafl SET IC = NULL WHERE TRIM(IC)='';
 UPDATE tafl SET PARC = NULL WHERE TRIM(PARC)='';
 UPDATE tafl SET Z = NULL WHERE TRIM(Z)='';
@@ -176,9 +181,25 @@ UPDATE tafl SET DATE = NULL WHERE DATE='    -  -  ';
 UPDATE tafl SET ICN = NULL WHERE TRIM(ICN)='';
 UPDATE tafl set ERP = NULL where trim(ERP)='';
 
+-- (TX field should probably be nulled if FLAGRXONLY is set.)
+UPDATE tafl set TX = NULL WHERE FLAGRXONLY=1;
+
 -- we have no use for entries with no location
 delete from tafl where trim(lat)='';
 delete from tafl where trim(long)='';
+
+-- the bloody classna like 'M%' thing for mobiles
+UPDATE tafl set ERP = NULL where CLASSNA like 'M%';
+UPDATE tafl set GANT = NULL where CLASSNA like 'M%';
+UPDATE tafl set AZIM = NULL where CLASSNA like 'M%';
+UPDATE tafl set SITE = NULL where CLASSNA like 'M%';
+UPDATE tafl set HANT = NULL where CLASSNA like 'M%';
+UPDATE tafl set PARC = NULL where CLASSNA like 'M%';
+UPDATE tafl set C = NULL where CLASSNA like 'M%';
+UPDATE tafl set Z = NULL where CLASSNA like 'M%';
+UPDATE tafl set LINKID = NULL where CLASSNA like 'M%';
+UPDATE tafl set RADIUSKM = NULL where CLASSNA not like 'M%';
+
 commit;
 
 -- add geometry

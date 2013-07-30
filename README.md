@@ -48,10 +48,11 @@ with:
 
 * LAT/LONG are kept as [D]DDMMSS text. We have real geometry fields,
   so why retain redundant float fields?
+* RECID is a number stored as a string to get around OGR's integer limits.
+* Added RADIUSKM for mobile sites (classna like 'M%')
 * RX-only and Multiple Links flags have been retained as new fields
   FLAGRXONLY (= 1 if receive-only) and FLAGMULTI ('*' if part of a
   multi-station link path).
-* (TX field should probably be nulled if FLAGRXONLY is set.)
 * DATE is reformatted as an ISO-standard YYYY-MM-DD format.
 * "Class of Emission (2)" has been retained as CL2EMMIS (it was
   stripped out by the offical DOS-only DBF converter).
@@ -66,7 +67,6 @@ anything that can talk to SpatiaLite. It was tested with Quantum GIS
 Bugs
 ----
 
-* The frequency conversion looks a few orders of magnitude off.
 * Emits lots of cryptic output while running. I mean, what's with all
   the '1's?
 
