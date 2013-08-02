@@ -81,7 +81,11 @@ Author
 
 Stewart C. Russell - http://scruss.com/blog/
 
-Original Perl Data parsing method strongly influenced by [dave0/Parse-SpectrumDirect-RadioFrequency](https://github.com/dave0/Parse-SpectrumDirect-RadioFrequency "dave0/Parse-SpectrumDirect-RadioFrequency").
+Original Perl Data parsing method strongly influenced by
+[dave0/Parse-SpectrumDirect-RadioFrequency](https://github.com/dave0/Parse-SpectrumDirect-RadioFrequency
+"dave0/Parse-SpectrumDirect-RadioFrequency"). The code in the “perl/”
+folder merely extracts tab-separated values from the columns, and
+doesn't take all the data columns (such as mobile radius) into account.
 
 Licence
 -------
