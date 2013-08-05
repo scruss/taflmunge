@@ -73,6 +73,7 @@ Bugs
 To Do
 -----
 
+* Implement proper FOREIGN KEYs in the links table.
 * Null some more empty fields.
 * Make this useful under the SpatiaLite GUI.
 
