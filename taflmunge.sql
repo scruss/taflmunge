@@ -1,8 +1,7 @@
 -- import TAFL data into SpatiaLite
--- tested with SpatiaLite version 3.1.0-RC2
---        based on SQLite version 3.7.15.2
+-- tested with SpatiaLite version 3.1.0-RC2 and 4.1.0
 
--- scruss - 2013-07-30
+-- scruss - 2013-10-10
 -- Licence: WTFPL
 
 -- some housekeeping
@@ -208,12 +207,12 @@ SELECT AddGeometryColumn('tafl','geom',4326,'POINT','XY');
 -- wanted to keep TAFL's quaint [D]DDMMSS string coordinate format
 --  (someone might be using it ...)
 -- but this made calculating decimal degrees quite ugly
--- note that these decomal coords are nowhere in the regular fields
+-- note that these decimal coords are nowhere in the regular fields
 UPDATE tafl SET geom = GeomFromText('POINT('||(0-(cast(substr(long,1,3) as real)+cast(substr(long,4,2) as real)/60+cast(substr(long,6,2) as real)/3600))||' '||(cast(substr(lat,1,2) as real)+cast(substr(lat,3,2) as real)/60+cast(substr(lat,5,2) as real)/3600)||')' ,4326);
 
 -- create links temporary table
 --  (temporary to get around SQLite's ALTER TABLE limitations)
--- I still have a sneaking feeling the logic's wrong somewhere here.
+-- *** There may be many duplicate or near-duplicate entries ***
 CREATE TEMPORARY TABLE templinks AS
 SELECT s.callsign||'-'||s.linkid AS NAME,
        s.PK_ROWID AS CALL_ROWID,
@@ -237,16 +236,18 @@ WHERE s.callsign IS NOT NULL
   AND e.callsign IS NOT NULL
   AND e.linkid IS NOT NULL
   AND s.callsign=e.linkid
+  AND s.F IN (6, 7)
+  AND e.F IN (6, 7)
   AND s.L<>'R'
-  AND e.L<>'R'
-GROUP BY name, s.TX;
+  AND e.L<>'R';
 
 -- create the permanent links table, complete with PK and geometry
+-- properly define foreign keys, too
 CREATE TABLE links(
   PK_ROWID INTEGER PRIMARY KEY,
   NAME TEXT,
-  CALL_ROWID INT,
-  LINK_ROWID INT,
+  CALL_ROWID INTEGER NOT NULL REFERENCES tafl(PK_ROWID),
+  LINK_ROWID INTEGER NOT NULL REFERENCES tafl(PK_ROWID),
   LICENSEE TEXT,
   STARTLOC TEXT,
   ENDLOC TEXT,

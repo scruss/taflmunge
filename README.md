@@ -11,8 +11,7 @@ Requirements
 ------------
 
 * [SpatiaLite](http://www.gaia-gis.it/gaia-sins/index.html
-  "SpatiaLite") - tested with version 3.1.0-RC2 (based on SQLite
-  version 3.7.15.2) on Ubuntu x86_64.
+  "SpatiaLite") - tested with version 3.1.0-RC2 and 4.1.0 on Ubuntu x86_64.
 
 Usage
 -----
@@ -32,14 +31,15 @@ Unix/Linux,
 
     sort -u ltaf*txt > tafl.txt
 
-will eliminate duplicates, merge and rename in one step.
+will eliminate duplicates, merge and rename in one step. Note that the
+SQL script will attempt to remove duplicates, too.
 
 This script/process has only been tested on the command-line version
 of SpatiaLite, and can be run as:
 
     echo '.read taflmunge.sql CP1252' | spatialite tafl.sqlite
 	
-After a short while and some very confusing output, this creates a
+After a short while (and some *very* confusing output), this creates a
 database file with two tables: "tafl" (point geometry) and "links" (for
 clearly identifiable microwave links; linestring geometry). Other
 fields are as
@@ -67,13 +67,14 @@ anything that can talk to SpatiaLite. It was tested with Quantum GIS
 Bugs
 ----
 
+* Still may include duplicate rows; seems that there's some
+  relationship between RECID, L and F that I haven't fully worked out.
 * Emits lots of cryptic output while running. I mean, what's with all
   the '1's?
 
 To Do
 -----
 
-* Implement proper FOREIGN KEYs in the links table.
 * Null some more empty fields.
 * Make this useful under the SpatiaLite GUI.
 
