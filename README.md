@@ -1,3 +1,5 @@
+(so this totally doesn't work any more. TAFL is no longer available, and any open data set of radio transmitters on Canada Open Data is much reduced.)
+
 taflmunge
 =========
 
